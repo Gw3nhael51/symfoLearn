@@ -7,9 +7,11 @@ use App\Entity\Conference;
 use EasyCorp\Bundle\EasyAdminBundle\Attribute\AdminDashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
+use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[AdminDashboard(routePath: '/admin', routeName: 'admin')]
 class DashboardController extends AbstractDashboardController
@@ -46,5 +48,20 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::linkToRoute('Retour au site', 'fa fa-home', 'homepage');
         yield MenuItem::linkTo(ConferenceCrudController::class, 'Conferences', 'fas fa-map-marker-alt');
         yield MenuItem::linkTo(CommentCrudController::class, 'Comments', 'fas fa-comments');
+        yield MenuItem::section();
+        yield MenuItem::linkToLogout('Déconnexion', 'fas fa-sign-out-alt');
+    }
+
+    /**
+     * Configure le menu de l'utilisateur connecté dans la barre supérieure
+     *
+     * @param UserInterface $user Administrateur connecté
+     * @return UserMenu Configuration du menu avec lien de déconnexion
+     */
+    public function configureUserMenu(UserInterface $user): UserMenu
+    {
+        return parent::configureUserMenu($user)
+            ->setName($user->getUserIdentifier())
+            ->displayUserName();
     }
 }
