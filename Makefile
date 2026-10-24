@@ -34,7 +34,7 @@ migrate:
 	symfony console doctrine:migrations:migrate --no-interaction
 
 test:
-	vendor/bin/phpunit
+	symfony run vendor/bin/phpunit
 
 watch:
 	symfony console tailwind:build --watch
