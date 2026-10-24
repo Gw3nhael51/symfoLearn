@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Conférences · EventPulse{% endblock %}
+
+{% block body %}
+<main class="relative isolate min-h-screen overflow-hidden bg-[#080b16] text-white selection:bg-cyan-300 selection:text-slate-950 pb-20">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_15%,rgba(56,189,248,0.2),transparent_35%),radial-gradient(ellipse_at_80%_65%,rgba(139,92,246,0.24),transparent_38%),linear-gradient(135deg,#080b16_10%,#111a31_55%,#101020)]"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -left-32 top-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-[100px]"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -right-24 top-24 h-96 w-96 rounded-full bg-violet-500/25 blur-[110px]"></div>
+
+    {% include 'home/_navigation.html.twig' %}
+
+    <div class="relative z-10 mx-auto max-w-7xl px-5 py-10 sm:px-8">
+        <header class="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <div class="inline-flex items-center gap-2 rounded-full border border-cyan-200/20 bg-cyan-200/[0.07] px-4 py-1.5 text-xs font-semibold tracking-wide text-cyan-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    DONNÉES DYNAMIQUES
+                </div>
+                <h1 class="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">Gestion des conférences</h1>
+                <p class="mt-1 text-sm text-slate-300">Vue d'ensemble des sessions et conférences enregistrées.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-mono text-slate-300">
+                    Total : {{ conferences|length }}
+                </span>
+            </div>
+        </header>
+
+        <!-- Tableau dynamique avec boucle Twig -->
+        <section class="rounded-[2rem] border border-white/15 bg-white/[0.07] p-6 shadow-2xl backdrop-blur-2xl sm:p-8">
+            <div class="flex items-center justify-between pb-5 border-b border-white/10">
+                <h2 class="text-xl font-bold text-white">Liste des conférences</h2>
+                <span class="text-xs text-slate-400">Flux en direct</span>
+            </div>
+
+            <div class="mt-6 overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead>
+                        <tr class="text-xs text-slate-400 border-b border-white/10">
+                            <th class="pb-3 font-semibold">Ville</th>
+                            <th class="pb-3 font-semibold">Année</th>
+                            <th class="pb-3 font-semibold">Envergure</th>
+                            <th class="pb-3 text-right font-semibold">Détails</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        {% for conference in conferences %}
+                            <tr class="group transition hover:bg-white/[0.03]">
+                                <td class="py-4 font-medium text-white flex items-center gap-3">
+                                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-400/10 text-cyan-300 font-bold text-xs">
+                                        {{ conference.city|slice(0, 1)|upper }}
+                                    </span>
+                                    {{ conference.city }}
+                                </td>
+                                <td class="py-4 text-slate-300 font-mono">{{ conference.year }}</td>
+                                <td class="py-4">
+                                    {% if conference.isInternational %}
+                                        <span class="rounded-full border border-violet-400/30 bg-violet-400/10 px-2.5 py-0.5 text-xs font-medium text-violet-300">
+                                            Internationale
+                                        </span>
+                                    {% else %}
+                                        <span class="rounded-full border border-slate-400/30 bg-slate-400/10 px-2.5 py-0.5 text-xs font-medium text-slate-300">
+                                            Nationale
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="py-4 text-right">
+                                    <span class="text-xs text-cyan-300 cursor-pointer hover:underline">Voir les avis →</span>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="py-12 text-center">
+                                    <div class="max-w-md mx-auto space-y-3">
+                                        <div class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-cyan-400/10 text-cyan-300 mb-2">
+                                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2 1.5 3 3.5 3h9c2 0 3.5-1 3.5-3V7M4 7c0-2 1.5-3 3.5-3h9c2 0 3.5 1 3.5 3M4 7h16" />
+                                            </svg>
+                                        </div>
+                                        <p class="text-base font-semibold text-white">Aucun événement enregistré</p>
+                                        <p class="text-xs text-slate-400">
+                                            Les conférences ajoutées apparaîtront automatiquement dans cette liste.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}
