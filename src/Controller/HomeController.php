@@ -8,6 +8,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class HomeController extends AbstractController
 {
+    /**
+     * Affiche la page d'accueil de l'application
+     *
+     * @return Response Réponse HTTP avec la vue Twig
+     */
     #[Route('/', name: 'homepage')]
     public function index(): Response
     {
