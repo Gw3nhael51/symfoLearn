@@ -1,0 +1,16 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}EventPulse · Gestion d'événements et flux en direct{% endblock %}
+
+{% block body %}
+
+    <main class="relative isolate min-h-screen overflow-hidden bg-[#080b16] text-white selection:bg-cyan-300 selection:text-slate-950">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_15%,rgba(56,189,248,0.2),transparent_35%),radial-gradient(ellipse_at_80%_65%,rgba(139,92,246,0.24),transparent_38%),linear-gradient(135deg,#080b16_10%,#111a31_55%,#101020)]"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute -left-32 top-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-[100px]"></div>
+        <div aria-hidden="true" class="pointer-events-none absolute -right-24 top-24 h-96 w-96 rounded-full bg-violet-500/25 blur-[110px]"></div>
+
+        {% include 'home/_navigation.html.twig' %}
+
+        {% include 'home/_presentation.html.twig' %}
+    </main>
+{% endblock %}
