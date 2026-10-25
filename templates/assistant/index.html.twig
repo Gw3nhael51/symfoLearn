@@ -1,0 +1,233 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Assistant IA · EventPulse{% endblock %}
+
+{% block body %}
+<main class="relative isolate min-h-screen overflow-hidden bg-[#080b16] text-white selection:bg-cyan-300 selection:text-slate-950 pb-20">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_15%,rgba(56,189,248,0.2),transparent_35%),radial-gradient(ellipse_at_80%_65%,rgba(139,92,246,0.24),transparent_38%),linear-gradient(135deg,#080b16_10%,#111a31_55%,#101020)]"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -left-32 top-40 h-96 w-96 rounded-full bg-cyan-400/20 blur-[100px]"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute -right-24 top-24 h-96 w-96 rounded-full bg-violet-500/25 blur-[110px]"></div>
+
+    {% include 'home/_navigation.html.twig' %}
+
+    <div class="relative z-10 mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-10">
+        <header class="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <div class="inline-flex items-center gap-2 rounded-full border border-cyan-200/20 bg-cyan-200/[0.07] px-3.5 py-1 text-xs font-semibold tracking-wide text-cyan-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl sm:px-4 sm:py-1.5">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    MOTEUR LOCAL OLLAMA ACTIF
+                </div>
+                <h1 class="mt-2.5 text-2xl font-bold tracking-tight text-white sm:mt-3 sm:text-3xl lg:text-4xl">Assistant IA</h1>
+                <p class="mt-1 text-xs text-slate-300 sm:text-sm">Interrogez vos modèles locaux en temps réel avec Symfony AI.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-mono text-slate-300">
+                    <span class="h-2 w-2 rounded-full bg-cyan-400"></span>
+                    127.0.0.1:11434
+                </span>
+            </div>
+        </header>
+
+        <div id="error-box" class="hidden mb-6 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-rose-200 text-sm shadow-xl backdrop-blur-xl">
+            <div class="flex items-center gap-2 font-semibold">
+                <svg class="h-5 w-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Erreur lors de l'exécution :</span>
+            </div>
+            <p id="error-message" class="mt-1 font-mono text-xs text-rose-300"></p>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+            <!-- Formulaire de saisie -->
+            <section class="lg:col-span-12 rounded-2xl border border-white/15 bg-white/[0.07] p-5 shadow-2xl backdrop-blur-2xl sm:rounded-[2rem] sm:p-7">
+                <form id="ai-form" data-turbo="false" method="POST" action="{{ path('app_assistant') }}" class="space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="model" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                                Modèle d'inférence
+                            </label>
+                            <div class="relative">
+                                <select id="model" name="model" class="w-full appearance-none rounded-xl border border-white/10 bg-slate-900/80 px-4 py-2.5 text-sm text-white focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 pr-10">
+                                    <option value="llama3.1:latest" {% if model == 'llama3.1:latest' %}selected{% endif %}>⚡ Llama 3.1 (Rapide & Précis - Recommandé)</option>
+                                    <option value="qwen3.5:9B" {% if model == 'qwen3.5:9B' %}selected{% endif %}>🧠 Qwen 3.5 (9B - Raisonnement)</option>
+                                    <option value="qwen3.8:27B" {% if model == 'qwen3.8:27B' %}selected{% endif %}>🚀 Qwen 3.8 (27B - Étendu)</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Suggestions rapides de prompt -->
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                                Suggestions rapides
+                            </label>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" onclick="setPrompt('Résume en 3 points clés les engagements d\'un contrat de prestation.')" class="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300 transition hover:bg-white/10 hover:text-white">
+                                    📋 Résumé contrat
+                                </button>
+                                <button type="button" onclick="setPrompt('Quelles sont les clauses types de pénalités de retard dans un devis ?')" class="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300 transition hover:bg-white/10 hover:text-white">
+                                    ⚠️ Clauses pénalités
+                                </button>
+                                <button type="button" onclick="setPrompt('Explique en une phrase claire ce qu\'est un SLA.')" class="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300 transition hover:bg-white/10 hover:text-white">
+                                    💡 Définition SLA
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="prompt" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                            Votre demande
+                        </label>
+                        <textarea id="prompt" name="prompt" rows="4" required placeholder="Tapez votre question ou collez un texte à analyser..." class="w-full rounded-xl border border-white/10 bg-slate-900/80 p-4 text-sm text-white placeholder-slate-400 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400">{{ prompt }}</textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2">
+                        <span class="text-xs text-slate-400 hidden sm:inline">Exécution 100 % confidentielle en local</span>
+                        <button id="submit-btn" type="submit" class="inline-flex items-center gap-2 rounded-full border border-cyan-300/40 bg-gradient-to-r from-cyan-500 via-sky-500 to-violet-500 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_20px_rgba(6,182,212,0.35)] transition-all hover:scale-[1.02] hover:shadow-[0_4px_25px_rgba(6,182,212,0.5)] active:scale-[0.98]">
+                            <svg id="btn-icon" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                            <span id="btn-text">Envoyer la demande</span>
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Zone de sortie de la réponse -->
+            <section class="lg:col-span-12 rounded-2xl border border-white/15 bg-white/[0.07] p-5 shadow-2xl backdrop-blur-2xl sm:rounded-[2rem] sm:p-7">
+                <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                    <div class="flex items-center gap-2.5">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-400/20 text-cyan-300">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <h2 class="text-base font-bold text-white sm:text-lg">Sortie de la réponse</h2>
+                            <p id="response-subtitle" class="text-xs text-slate-400">Résultat renvoyé par le modèle</p>
+                        </div>
+                    </div>
+                    <button id="copy-btn" type="button" onclick="copyResponse()" class="hidden inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10 hover:text-white" title="Copier le texte">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span id="copy-text">Copier</span>
+                    </button>
+                </div>
+
+                <div class="mt-4">
+                    <!-- Conteneur de réponse active -->
+                    <div id="response-container" class="hidden rounded-xl border border-cyan-400/20 bg-slate-900/60 p-5 shadow-inner">
+                        <div id="ai-response-content" class="whitespace-pre-wrap font-sans text-sm sm:text-base leading-relaxed text-slate-100 selection:bg-cyan-400/30"></div>
+                    </div>
+
+                    <!-- Indicateur de chargement en cours -->
+                    <div id="loading-state" class="hidden flex flex-col items-center justify-center py-10 text-center">
+                        <div class="h-9 w-9 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin mb-4"></div>
+                        <p class="text-sm font-semibold text-cyan-200">Génération de la réponse en cours...</p>
+                        <p class="text-xs text-slate-400 mt-1">Le modèle local traite votre demande (2 à 4 secondes).</p>
+                    </div>
+
+                    <!-- État vide avant le premier envoi -->
+                    <div id="empty-state" class="flex flex-col items-center justify-center py-12 text-center">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-slate-400 mb-3 border border-white/10">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-sm font-semibold text-slate-200">En attente de votre prompt</h3>
+                        <p class="mt-1 text-xs text-slate-400 max-w-sm">Renseignez votre demande ci-dessus ou cliquez sur une suggestion rapide, puis envoyez pour voir la réponse s'afficher ici.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script>
+    function setPrompt(text) {
+        document.getElementById('prompt').value = text;
+        document.getElementById('prompt').focus();
+    }
+
+    function copyResponse() {
+        const text = document.getElementById('ai-response-content').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            const copyLabel = document.getElementById('copy-text');
+            copyLabel.innerText = 'Copié !';
+            setTimeout(() => { copyLabel.innerText = 'Copier'; }, 2000);
+        });
+    }
+
+    // Gestion de l'appel asynchrone sans rechargement de page
+    document.getElementById('ai-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const btn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnIcon = document.getElementById('btn-icon');
+        const emptyState = document.getElementById('empty-state');
+        const loadingState = document.getElementById('loading-state');
+        const responseContainer = document.getElementById('response-container');
+        const responseContent = document.getElementById('ai-response-content');
+        const copyBtn = document.getElementById('copy-btn');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+        const subtitle = document.getElementById('response-subtitle');
+
+        // Réinitialisation de l'affichage
+        errorBox.classList.add('hidden');
+        emptyState.classList.add('hidden');
+        responseContainer.classList.add('hidden');
+        loadingState.classList.remove('hidden');
+
+        btn.disabled = true;
+        btn.classList.add('opacity-75', 'cursor-wait');
+        btnText.innerText = 'Génération en cours...';
+        btnIcon.classList.add('animate-spin');
+
+        try {
+            const formData = new FormData(this);
+            const res = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await res.json();
+
+            loadingState.classList.add('hidden');
+
+            if (data.success && data.response) {
+                responseContent.innerText = data.response;
+                responseContainer.classList.remove('hidden');
+                copyBtn.classList.remove('hidden');
+                subtitle.innerText = 'Généré par ' + data.model;
+            } else {
+                errorMessage.innerText = data.error || 'Aucune réponse reçue du modèle.';
+                errorBox.classList.remove('hidden');
+                emptyState.classList.remove('hidden');
+            }
+        } catch (err) {
+            loadingState.classList.add('hidden');
+            errorMessage.innerText = err.message || 'Erreur réseau lors de la communication avec le serveur.';
+            errorBox.classList.remove('hidden');
+            emptyState.classList.remove('hidden');
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('opacity-75', 'cursor-wait');
+            btnText.innerText = 'Envoyer la demande';
+            btnIcon.classList.remove('animate-spin');
+        }
+    });
+</script>
+{% endblock %}
